@@ -72,26 +72,24 @@ def create_map():
         
         return latitude, longitude
     
+    # Fungsi untuk membaca data dari database SQLite
     def read_data_from_csv(csv_path):
-            df = pd.read_csv(csv_path)
-            latest_data = df.sort_values('DateTime', ascending=False).iloc[0]
-            return {
-                "tanggal": latest_data['Tanggal'],
-                "waktu": latest_data['Jam'],
-                "koordinat": latest_data['Coordinates'],
-                "lintang": latest_data['Lintang'],
-                "bujur": latest_data['Bujur'],
-                "magnitude": latest_data['Magnitude'],
-                "kedalaman": latest_data['Kedalaman'],
-                "wilayah": latest_data['Wilayah'],
-                'potensi': latest_data['Potensi']
-            }
-    
-    # Path ke database
-    csv_path = os.path.join("InfoGempaID_CSV", "DatasetGempa.csv")
+        df = pd.read_csv(csv_path)
+        latest_data = df.sort_values('DateTime', ascending=False).iloc[0]
+        return {
+            "tanggal": latest_data['Tanggal'],
+            "waktu": latest_data['Jam'],
+            "koordinat": latest_data['Coordinates'],
+            "lintang": latest_data['Lintang'],
+            "bujur": latest_data['Bujur'],
+            "magnitude": latest_data['Magnitude'],
+            "kedalaman": latest_data['Kedalaman'],
+            "wilayah": latest_data['Wilayah'],
+            'potensi': latest_data['Potensi']
+        }
     
     # Membaca data terbaru dari database
-    data = read_data_from_csv(csv_path)
+    data = read_data_csv(csv_path)
     
     # Mengonversi lintang dan bujur
     latitude, longitude = convert_coordinates(data['lintang'], data['bujur'])
@@ -125,11 +123,10 @@ def create_map():
     plt.gca().spines['left'].set_visible(False)
     
     # Simpan plot ke dalam file
-    plt.savefig(r'D:\Coding\InfoGempaID\lokasi_baru1.png', bbox_inches='tight', pad_inches=0)
+    plt.savefig(os.path.join("InfoGempaID_CSV", "lokasi_baru1.png"), bbox_inches='tight', pad_inches=0)
     
     # Menampilkan plot
     plt.show()
-
 
 def create_UI():
     from PIL import Image, ImageDraw, ImageFont
