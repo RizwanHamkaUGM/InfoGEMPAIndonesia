@@ -48,47 +48,88 @@ csv_path = os.path.join("InfoGempaID_CSV", "DatasetGempa.csv")
 
 def create_map():
     import matplotlib.pyplot as plt
-    from mpl_toolkits.basemap import Basemap
-
-    # Path ke file CSV relatif
-    csv_path = os.path.join("InfoGempaID_CSV", "DatasetGempa.csv")
+    import sqlite3
+    import cartopy.crs as ccrs
+    import cartopy.feature as cfeature
+    
+    # Fungsi untuk konversi lintang dan bujur dari format teks ke float
+    def convert_coordinates(lintang, bujur):
+        # Konversi lintang
+        if 'LS' in lintang:
+            latitude = -float(lintang.replace('LS', '').strip())
+        elif 'LU' in lintang:
+            latitude = float(lintang.replace('LU', '').strip())
+        else:
+            raise ValueError("Format lintang tidak dikenal. Harus ada 'LS' atau 'LU'.")
+    
+        # Konversi bujur
+        if 'BT' in bujur:
+            longitude = float(bujur.replace('BT', '').strip())
+        elif 'BB' in bujur:
+            longitude = -float(bujur.replace('BB', '').strip())
+        else:
+            raise ValueError("Format bujur tidak dikenal. Harus ada 'BT' atau 'BB'.")
+        
+        return latitude, longitude
     
     def read_data_from_csv(csv_path):
-        df = pd.read_csv(csv_path)
-        latest_data = df.sort_values('DateTime', ascending=False).iloc[0]
-        return {
-            "tanggal": latest_data['Tanggal'],
-            "waktu": latest_data['Jam'],
-            "koordinat": latest_data['Coordinates'],
-            "lintang": latest_data['Lintang'],
-            "bujur": latest_data['Bujur'],
-            "magnitude": latest_data['Magnitude'],
-            "kedalaman": latest_data['Kedalaman'],
-            "wilayah": latest_data['Wilayah'],
-            'potensi': latest_data['Potensi']
-        }
-
+            df = pd.read_csv(csv_path)
+            latest_data = df.sort_values('DateTime', ascending=False).iloc[0]
+            return {
+                "tanggal": latest_data['Tanggal'],
+                "waktu": latest_data['Jam'],
+                "koordinat": latest_data['Coordinates'],
+                "lintang": latest_data['Lintang'],
+                "bujur": latest_data['Bujur'],
+                "magnitude": latest_data['Magnitude'],
+                "kedalaman": latest_data['Kedalaman'],
+                "wilayah": latest_data['Wilayah'],
+                'potensi': latest_data['Potensi']
+            }
+    
+    # Path ke database
+    csv_path = os.path.join("InfoGempaID_CSV", "DatasetGempa.csv")
+    
+    # Membaca data terbaru dari database
     data = read_data_from_csv(csv_path)
-    latitude = float(data['lintang'][0:3])
-    longitude = float(data['bujur'][0:5])
-
-    fig, ax = plt.subplots(figsize=(9, 18))
-    m = Basemap(projection='merc', llcrnrlat=-15, urcrnrlat=12, llcrnrlon=94, urcrnrlon=141, resolution='i', ax=ax)
-    m.drawcoastlines()
-    m.drawcountries()
-    m.drawmapboundary(fill_color='#25656a')
-    m.fillcontinents(color='lightgray', lake_color='aqua')
-    x, y = m(longitude, latitude)
-    m.plot(x, y, 'ro', markersize=4, label="Lokasi Gempa")
-    num_rings = 10
-    ring_spacing = 0.7
+    
+    # Mengonversi lintang dan bujur
+    latitude, longitude = convert_coordinates(data['lintang'], data['bujur'])
+    
+    # Membuat plot dengan cartopy
+    fig = plt.figure(figsize=(9, 18))
+    ax = plt.axes(projection=ccrs.PlateCarree())
+    
+    # Menambahkan peta dasar dan fitur
+    ax.set_extent([94, 141, -15, 12], crs=ccrs.PlateCarree())  # Batas peta untuk wilayah Indonesia
+    ax.add_feature(cfeature.LAND, color='lightgray')
+    ax.add_feature(cfeature.OCEAN, color='#25656a')
+    ax.add_feature(cfeature.COASTLINE)
+    ax.add_feature(cfeature.BORDERS, linestyle=':')
+    
+    # Plot lokasi gempa
+    ax.plot(longitude, latitude, 'ro', markersize=4, transform=ccrs.PlateCarree(), label="Lokasi Gempa")
+    
+    # Menambahkan efek gelombang di sekitar titik lokasi gempa
+    num_rings = 10  # Jumlah gelombang
+    ring_spacing = 0.7  # Jarak antara lingkaran dalam derajat
     for i in range(1, num_rings + 1):
-        circle_radius = i * ring_spacing
-        m.tissot(longitude, latitude, circle_radius, 100, facecolor='none', edgecolor='red', linestyle='--', linewidth=1)
-
-    ax.axis('off')
-    plt.savefig(os.path.join("InfoGempaID_CSV", "lokasi_baru1.png"), bbox_inches='tight', pad_inches=0)
+        circle_radius = i * ring_spacing  # Radius lingkaran dalam derajat
+        circle = plt.Circle((longitude, latitude), circle_radius, color='red', fill=False, linestyle='--', transform=ccrs.PlateCarree())
+        ax.add_patch(circle)
+    
+    # Sembunyikan grid dan axis
+    plt.gca().spines['top'].set_visible(False)
+    plt.gca().spines['right'].set_visible(False)
+    plt.gca().spines['bottom'].set_visible(False)
+    plt.gca().spines['left'].set_visible(False)
+    
+    # Simpan plot ke dalam file
+    plt.savefig(r'D:\Coding\InfoGempaID\lokasi_baru1.png', bbox_inches='tight', pad_inches=0)
+    
+    # Menampilkan plot
     plt.show()
+
 
 def create_UI():
     from PIL import Image, ImageDraw, ImageFont
