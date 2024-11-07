@@ -1,4 +1,4 @@
-name: Earthquake Data Update
+name: Earthquake Data
 
 on:
   schedule:
