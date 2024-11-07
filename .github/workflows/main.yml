@@ -5,6 +5,7 @@ on:
     - cron: '*/31 * * * *'  # Menjalankan setiap 30 menit
   push:
     branches:
+      - main
 
 jobs:
   update_data:
@@ -21,7 +22,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        pip install requests pandas SQLAlchemy python-dotenv matplotlib basemap instagrapi pillow
+        pip install requests pandas SQLAlchemy python-dotenv matplotlib cartopy instagrapi pillow
 
     - name: Run main script
       run: python main.py
