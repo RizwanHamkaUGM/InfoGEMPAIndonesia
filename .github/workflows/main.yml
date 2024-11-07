@@ -24,8 +24,4 @@ jobs:
 
 
     - name: Run main script
-      env:
-        DB_PATH: "/tmp/DatasetGempa.db"  # Path sementara untuk database
-        INSTAGRAM_USERNAME: ${{ secrets.INSTAGRAM_USERNAME }}
-        INSTAGRAM_PASSWORD: ${{ secrets.INSTAGRAM_PASSWORD }}
       run: python main.py
