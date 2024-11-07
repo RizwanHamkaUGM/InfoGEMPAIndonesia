@@ -3,6 +3,10 @@ name: Earthquake Data Update
 on:
   schedule:
     - cron: '*/5 * * * *'  # Menjalankan setiap 5 menit
+  push:
+    branches:
+      - main  # Menjalankan workflow setiap kali ada commit di branch utama
+
 jobs:
   update_data:
     runs-on: ubuntu-latest
@@ -19,7 +23,6 @@ jobs:
     - name: Install dependencies
       run: |
         pip install requests pandas SQLAlchemy python-dotenv matplotlib basemap instagrapi pillow
-
 
     - name: Run main script
       run: python main.py
