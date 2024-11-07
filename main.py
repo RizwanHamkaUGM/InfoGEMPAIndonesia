@@ -39,7 +39,7 @@ def fetch_and_update_data(csv_path):
         time.sleep(5)
         create_UI()
         time.sleep(5)
-        #up_to_instagram()
+        up_to_instagram()
     else:
         print("Data sudah up-to-date. Tidak ada data baru.")
 
