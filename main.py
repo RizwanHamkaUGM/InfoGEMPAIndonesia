@@ -201,8 +201,9 @@ def up_to_instagram():
 def commit_and_push_to_github():
     try:
         commit_message = "Update earthquake map and data"
-        subprocess.run(["git", "add", "InfoGempaID_CSV/lokasi_baru1.png"], check=True)
-        subprocess.run(["git", "add", "InfoGempaID_CSV/GEMPATERBARU.png"], check=True)
+        subprocess.run(["git", "add", os.path.join("InfoGempaID_CSV", "lokasi_baru1.png")], check=True)
+        subprocess.run(["git", "add", os.path.join("InfoGempaID_CSV", "GEMPATERBARU.png")], check=True)
+        subprocess.run(["git", "add", os.path.join("InfoGempaID_CSV", "DatasetGempa.csv")], check=True)
         subprocess.run(["git", "commit", "-m", commit_message], check=True)
         subprocess.run(["git", "push"], check=True)
         print("Perubahan berhasil dikomit dan dipush ke GitHub.")
