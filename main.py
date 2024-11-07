@@ -42,6 +42,28 @@ def fetch_and_update_data(csv_path):
         up_to_instagram()
     else:
         print("Data sudah up-to-date. Tidak ada data baru.")
+    import subprocess
+    
+    # Fungsi untuk mengkomit dan mengirim perubahan ke GitHub
+    def commit_and_push_to_github():
+        try:
+            # Add semua perubahan
+            subprocess.run(["git", "add", "."], check=True)
+    
+            # Commit perubahan dengan pesan otomatis
+            commit_message = "Update earthquake data and images automatically"
+            subprocess.run(["git", "commit", "-m", commit_message], check=True)
+    
+            # Push perubahan ke GitHub
+            subprocess.run(["git", "push"], check=True)
+            print("Perubahan telah dikomit dan dipush ke GitHub.")
+            
+        except subprocess.CalledProcessError as e:
+            print(f"Terjadi kesalahan saat mencoba mengkomit/push: {e}")
+    
+    # Panggil fungsi untuk komit dan push ke GitHub setelah pembaruan data
+    commit_and_push_to_github()
+
 
 # Path ke file CSV relatif ke root repositori
 csv_path = os.path.join("InfoGempaID_CSV", "DatasetGempa.csv")
