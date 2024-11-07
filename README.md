@@ -1,5 +1,5 @@
 # Info Gempa ID
-Proyek ini mengambil data gempa terkini dari BMKG, menambahkannya ke database SQLite, membuat peta dan UI otomatis, serta mengunggahnya ke Instagram.
+Proyek ini mengambil data gempa terkini dari BMKG, menambahkannya ke database SQLite atau CSV, membuat peta dan UI otomatis, serta mengunggahnya ke Instagram.
 
 ## Persyaratan
 - Python 3.x
