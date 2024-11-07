@@ -201,17 +201,23 @@ def up_to_instagram():
 def commit_and_push_to_github():
     try:
         commit_message = "Update earthquake map and data"
-        subprocess.run(["git", "add", os.path.join("InfoGempaID_CSV", "lokasi_baru1.png")], check=True)
-        subprocess.run(["git", "add", os.path.join("InfoGempaID_CSV", "GEMPATERBARU.png")], check=True)
-        subprocess.run(["git", "add", os.path.join("InfoGempaID_CSV", "DatasetGempa.csv")], check=True)
+        csv_path = os.path.join("InfoGempaID_CSV", "DatasetGempa.csv")
+        png_paths = [
+            os.path.join("InfoGempaID_CSV", "lokasi_baru1.png"), 
+            os.path.join("InfoGempaID_CSV", "GEMPATERBARU.png")
+        ]
+
+        # Git commands
+        subprocess.run(["git", "add", *png_paths, csv_path], check=True)
         subprocess.run(["git", "commit", "-m", commit_message], check=True)
 
-        # Pastikan untuk menghapus cache credential jika diperlukan:
-        subprocess.run(["git", "config", "--global", "credential.helper", ""], check=True)
-        
-        # Gunakan subprocess untuk push dengan token atau SSH (pastikan sudah dikonfigurasi)
-        subprocess.run(["git", "push"], check=True)
-        
+        # URL dengan Personal Access Token
+        token = "<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>"  # Ganti <your_token> dengan token Anda
+        repo_url = f"https://{token}@github.com/RizwanHamkaUGM/InfoGEMPAIndonesia.git"
+        subprocess.run(["git", "remote", "set-url", "origin", repo_url], check=True)
+
+        # Push changes
+        subprocess.run(["git", "push", "origin", "main"], check=True)  # Sesuaikan branch jika berbeda
         print("Perubahan berhasil dikomit dan dipush ke GitHub.")
     except subprocess.CalledProcessError as e:
         print(f"Terjadi kesalahan saat mencoba mengkomit/push: {e}")
