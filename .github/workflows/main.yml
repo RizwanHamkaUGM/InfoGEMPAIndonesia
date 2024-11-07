@@ -2,7 +2,7 @@ name: Earthquake Data
 
 on:
   schedule:
-    - cron: '*/5 * * * *'  # Menjalankan setiap 5 menit
+    - cron: '*/15 * * * *'  # Menjalankan setiap 5 menit
   push:
     branches:
       - main  # Menjalankan workflow setiap kali ada commit di branch utama
