@@ -196,14 +196,4 @@ def up_to_instagram():
     # Upload gambar yang telah diubah ukurannya
     media = cl.photo_upload(path=image_path, caption=capt)
 
-# Loop untuk pengecekan otomatis
-while True:
-    try:
-        # Panggil fungsi untuk memperbarui data jika ada perubahan
-        fetch_and_update_data(csv_path)
-        
-        # Tunggu selama 5 menit sebelum pengecekan berikutnya
-        time.sleep(60)  # Tunggu 5 menit (300 detik)
-    except Exception as e:
-        print("Terjadi kesalahan:", e)
-        time.sleep(10)  # Jeda sebelum mencoba kembali
+fetch_and_update_data(csv_path)
