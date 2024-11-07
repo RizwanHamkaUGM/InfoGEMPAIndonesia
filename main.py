@@ -1,8 +1,9 @@
 import time
 import pandas as pd
 import requests
-from sqlalchemy import create_engine
 import os
+import subprocess
+from sqlalchemy import create_engine
 
 # Fungsi untuk mengambil dan memperbarui data dari BMKG
 def fetch_and_update_data(csv_path):
@@ -40,61 +41,32 @@ def fetch_and_update_data(csv_path):
         create_UI()
         time.sleep(5)
         up_to_instagram()
+        
+        # Komit dan push perubahan ke GitHub
+        commit_and_push_to_github()
     else:
         print("Data sudah up-to-date. Tidak ada data baru.")
-    import subprocess
-    
-    # Fungsi untuk mengkomit dan mengirim perubahan ke GitHub
-    def commit_and_push_to_github():
-        try:
-            # Add semua perubahan
-            subprocess.run(["git", "add", "."], check=True)
-    
-            # Commit perubahan dengan pesan otomatis
-            commit_message = "Update earthquake data and images automatically"
-            subprocess.run(["git", "commit", "-m", commit_message], check=True)
-    
-            # Push perubahan ke GitHub
-            subprocess.run(["git", "push"], check=True)
-            print("Perubahan telah dikomit dan dipush ke GitHub.")
-            
-        except subprocess.CalledProcessError as e:
-            print(f"Terjadi kesalahan saat mencoba mengkomit/push: {e}")
-    
-    # Panggil fungsi untuk komit dan push ke GitHub setelah pembaruan data
-    commit_and_push_to_github()
-
 
 # Path ke file CSV relatif ke root repositori
 csv_path = os.path.join("InfoGempaID_CSV", "DatasetGempa.csv")
 
 def create_map():
     import matplotlib.pyplot as plt
-    import sqlite3
     import cartopy.crs as ccrs
     import cartopy.feature as cfeature
-    
+
     # Fungsi untuk konversi lintang dan bujur dari format teks ke float
     def convert_coordinates(lintang, bujur):
-        # Konversi lintang
         if 'LS' in lintang:
             latitude = -float(lintang.replace('LS', '').strip())
         elif 'LU' in lintang:
             latitude = float(lintang.replace('LU', '').strip())
-        else:
-            raise ValueError("Format lintang tidak dikenal. Harus ada 'LS' atau 'LU'.")
-    
-        # Konversi bujur
         if 'BT' in bujur:
             longitude = float(bujur.replace('BT', '').strip())
         elif 'BB' in bujur:
             longitude = -float(bujur.replace('BB', '').strip())
-        else:
-            raise ValueError("Format bujur tidak dikenal. Harus ada 'BT' atau 'BB'.")
-        
         return latitude, longitude
-    
-    # Fungsi untuk membaca data dari database SQLite
+
     def read_data_from_csv(csv_path):
         df = pd.read_csv(csv_path)
         latest_data = df.sort_values('DateTime', ascending=False).iloc[0]
@@ -109,46 +81,29 @@ def create_map():
             "wilayah": latest_data['Wilayah'],
             'potensi': latest_data['Potensi']
         }
-    
-    # Membaca data terbaru dari database
-    data = read_data_csv(csv_path)
-    
-    # Mengonversi lintang dan bujur
+
+    # Membaca data terbaru dari CSV
+    data = read_data_from_csv(csv_path)
     latitude, longitude = convert_coordinates(data['lintang'], data['bujur'])
     
-    # Membuat plot dengan cartopy
     fig = plt.figure(figsize=(9, 18))
     ax = plt.axes(projection=ccrs.PlateCarree())
-    
-    # Menambahkan peta dasar dan fitur
-    ax.set_extent([94, 141, -15, 12], crs=ccrs.PlateCarree())  # Batas peta untuk wilayah Indonesia
+    ax.set_extent([94, 141, -15, 12], crs=ccrs.PlateCarree())
     ax.add_feature(cfeature.LAND, color='lightgray')
     ax.add_feature(cfeature.OCEAN, color='#25656a')
     ax.add_feature(cfeature.COASTLINE)
     ax.add_feature(cfeature.BORDERS, linestyle=':')
-    
-    # Plot lokasi gempa
+
     ax.plot(longitude, latitude, 'ro', markersize=4, transform=ccrs.PlateCarree(), label="Lokasi Gempa")
-    
-    # Menambahkan efek gelombang di sekitar titik lokasi gempa
-    num_rings = 10  # Jumlah gelombang
-    ring_spacing = 0.7  # Jarak antara lingkaran dalam derajat
+    num_rings = 10
+    ring_spacing = 0.7
     for i in range(1, num_rings + 1):
-        circle_radius = i * ring_spacing  # Radius lingkaran dalam derajat
+        circle_radius = i * ring_spacing
         circle = plt.Circle((longitude, latitude), circle_radius, color='red', fill=False, linestyle='--', transform=ccrs.PlateCarree())
         ax.add_patch(circle)
     
-    # Sembunyikan grid dan axis
-    plt.gca().spines['top'].set_visible(False)
-    plt.gca().spines['right'].set_visible(False)
-    plt.gca().spines['bottom'].set_visible(False)
-    plt.gca().spines['left'].set_visible(False)
-    
-    # Simpan plot ke dalam file
     plt.savefig(os.path.join("InfoGempaID_CSV", "lokasi_baru1.png"), bbox_inches='tight', pad_inches=0)
-    
-    # Menampilkan plot
-    plt.show()
+    print("Map tersimpan sebagai 'lokasi_baru1.png'.")
 
 def create_UI():
     from PIL import Image, ImageDraw, ImageFont
@@ -214,16 +169,10 @@ def create_UI():
 
 def up_to_instagram():
     from instagrapi import Client
-    import sqlite3
 
     def read_data_from_csv(csv_path):
-        # Membaca data dari file CSV
         df = pd.read_csv(csv_path)
-        
-        # Mengambil data terbaru berdasarkan kolom DateTime
         latest_data = df.sort_values('DateTime', ascending=False).iloc[0]
-        
-        # Jika data ditemukan, kembalikan dalam bentuk dictionary
         return {
             "tanggal": latest_data['Tanggal'],
             "waktu": latest_data['Jam'],
@@ -236,24 +185,29 @@ def up_to_instagram():
             'potensi': latest_data['Potensi']
         }
 
-    # Membaca data terbaru dari CSV
     data = read_data_from_csv(csv_path)
 
+    capt = (f"🌍 Gempa Terkini ! 🌍\n\n📍  Lokasi     : {data['wilayah']}\n📅  Tanggal   : {data['tanggal']}\n"
+            f"🕗  Waktu     : {data['waktu']}\n🎯  Koordinat : {data['koordinat']}\n"
+            f"📊  Magnitudo : {data['magnitude']} SR\n📏  Kedalaman : {data['kedalaman']}\n"
+            f"📢  Potensi   : {data['potensi']}\n\nData resmi dari BMKG.")
 
-    capt = (f"🌍 Gempa Terkini ! 🌍\n\n📍  Lokasi     : {data['wilayah']}\n📅 Tanggal    : {data['tanggal']}\n🕒 Waktu      : {data['waktu']}\n"
-            f"🌐 Koordinat  : {data['bujur']} LS, {data['lintang']} BT\n💥 Magnitude  : {data['magnitude']}\n"
-            f"🌊 Potensi Tsunami: {data['potensi']}\n🔻 Kedalaman  : {data['kedalaman']}\n\n"
-            f"Kami mengimbau untuk tetap waspada dan mengikuti informasi resmi dari pihak berwenang. "
-            f"Jaga keselamatan diri dan keluarga! 🙏\n#Gempa #Kesiapsiagaan #Indonesia #InfoIDGempa #gempa #earthquake")
-
-
-    image_path = os.path.join("InfoGempaID_CSV", "GEMPATERBARU.png")
-
-    # Login dan upload menggunakan instagrapi
     cl = Client()
-    cl.login("infogempaid", "Megamode12")
+    cl.login("username", "password")
+    media_path = os.path.join("InfoGempaID_CSV", "GEMPATERBARU.png")
+    cl.photo_upload(media_path, capt)
+    print("Post berhasil diunggah ke Instagram.")
 
-    # Upload gambar yang telah diubah ukurannya
-    media = cl.photo_upload(path=image_path, caption=capt)
+def commit_and_push_to_github():
+    try:
+        commit_message = "Update earthquake map and data"
+        subprocess.run(["git", "add", "InfoGempaID_CSV/lokasi_baru1.png"], check=True)
+        subprocess.run(["git", "add", "InfoGempaID_CSV/GEMPATERBARU.png"], check=True)
+        subprocess.run(["git", "commit", "-m", commit_message], check=True)
+        subprocess.run(["git", "push"], check=True)
+        print("Perubahan berhasil dikomit dan dipush ke GitHub.")
+    except subprocess.CalledProcessError as e:
+        print(f"Terjadi kesalahan saat mencoba mengkomit/push: {e}")
 
+# Eksekusi proses utama
 fetch_and_update_data(csv_path)
