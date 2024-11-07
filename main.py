@@ -205,7 +205,13 @@ def commit_and_push_to_github():
         subprocess.run(["git", "add", os.path.join("InfoGempaID_CSV", "GEMPATERBARU.png")], check=True)
         subprocess.run(["git", "add", os.path.join("InfoGempaID_CSV", "DatasetGempa.csv")], check=True)
         subprocess.run(["git", "commit", "-m", commit_message], check=True)
+
+        # Pastikan untuk menghapus cache credential jika diperlukan:
+        subprocess.run(["git", "config", "--global", "credential.helper", ""], check=True)
+        
+        # Gunakan subprocess untuk push dengan token atau SSH (pastikan sudah dikonfigurasi)
         subprocess.run(["git", "push"], check=True)
+        
         print("Perubahan berhasil dikomit dan dipush ke GitHub.")
     except subprocess.CalledProcessError as e:
         print(f"Terjadi kesalahan saat mencoba mengkomit/push: {e}")
