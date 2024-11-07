@@ -3,7 +3,6 @@ name: Earthquake Data Update
 on:
   schedule:
     - cron: '*/5 * * * *'  # Menjalankan setiap 5 menit
-    workflow_dispatch:  # Memungkinkan pemicu manual
 
 jobs:
   update_data:
