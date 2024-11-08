@@ -9,20 +9,20 @@ from oauth2client.service_account import ServiceAccountCredentials
 # Autentikasi Google Sheets
 def authenticate_google_sheets():
     scope = ['https://www.googleapis.com/auth/spreadsheets']
-    
-    # Ambil credential JSON dari environment variable
-    cred_json = os.environ["CREDENTIALS_API"]
+
+    # Fetch and decode the credential JSON from the environment variable
+    cred_json = os.environ.get("CREDENTIALS_API")
     if not cred_json:
-        raise ValueError("Environment variable 'CREDENTIALS_API' tidak ditemukan atau kosong.")
-    print("Environment variable berhasil ditemukan.")
-    
-    # Parsing JSON string ke dalam dictionary
+        raise ValueError("Environment variable 'CREDENTIALS_API' not found or is empty.")
+    print("Environment variable found.")
+
+    # Decode the JSON string to a dictionary
     try:
-        creds_dict = json.loads(cred_json)
-    except json.JSONDecodeError:
-        raise ValueError("JSON di environment variable 'CREDENTIALS_API' tidak valid atau mengalami kesalahan decoding.")
-    
-    # Buat credential object dari dictionary
+        creds_dict = json.loads(cred_json)  # Convert JSON string to dict
+    except json.JSONDecodeError as e:
+        raise ValueError("Invalid JSON in 'CREDENTIALS_API' environment variable.") from e
+
+    # Create credentials from dictionary
     creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
     client = gspread.authorize(creds)
     return client
