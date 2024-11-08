@@ -3,13 +3,21 @@ import time
 import pandas as pd
 import requests
 import gspread
+import json
 from oauth2client.service_account import ServiceAccountCredentials
 
 # Autentikasi Google Sheets
 def authenticate_google_sheets():
     scope = ['https://www.googleapis.com/auth/spreadsheets']
-    cred_json = os.path.join("InfoGempaID_CSV", "credentials.json")
-    creds = ServiceAccountCredentials.from_json_keyfile_name(cred_json, scope)
+    
+    # Ambil credential JSON dari environment variable
+    cred_json = os.getenv("CREDENTIALS_API")
+    
+    # Parsing JSON string ke dalam dictionary
+    creds_dict = json.loads(cred_json)
+    
+    # Buat credential object dari dictionary
+    creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
     client = gspread.authorize(creds)
     return client
 
