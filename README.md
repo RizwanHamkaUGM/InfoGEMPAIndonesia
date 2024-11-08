@@ -1,20 +1,23 @@
-# Info Gempa ID
-Proyek ini mengambil data gempa terkini dari BMKG, menambahkannya ke database SQLite atau CSV, membuat peta dan UI otomatis, serta mengunggahnya ke Instagram.
+# 🌍 Info Gempa ID
+Proyek ini bertujuan untuk mengambil data gempa terkini dari BMKG, memperbaruinya ke Google Sheets dalam format CSV, membuat peta dan UI secara otomatis, serta mengunggahnya ke Instagram pada akun [@infogempaid](https://www.instagram.com/infogempaid/).
 
-## Persyaratan
-- Python 3.x
-- Akun Instagram
-- Database BMKG
+## 🛠️ Persyaratan
+- Python 3.x 🐍
+- Akun Instagram 📸
+- Akses ke Google Sheets 📄
 
-## Instalasi
+## 🚀 Instalasi
 1. Clone repositori ini.
+   ```bash
+   git clone <URL_repositori>
+   cd <nama_folder_repositori>
 2. Install dependensi:
    ```bash
    pip install -r requirements.txt
    ```
 3. Buat file `.env` dan isi dengan kredensial yang diperlukan.
 
-## Menjalankan
+## ▶️ Menjalankan
 Jalankan perintah berikut untuk memulai program:
 ```bash
 python main.py
