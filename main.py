@@ -1,54 +1,55 @@
+import os
 import time
 import pandas as pd
 import requests
-import os
-import subprocess
-from sqlalchemy import create_engine
+import gspread
+from oauth2client.service_account import ServiceAccountCredentials
 
-# Fungsi untuk mengambil dan memperbarui data dari BMKG
-def fetch_and_update_data(csv_path):
+# Autentikasi Google Sheets
+def authenticate_google_sheets():
+    scope = ['https://www.googleapis.com/auth/spreadsheets']
+    cred_json = os.path.join("InfoGempaID_CSV", "credentials.json")
+    creds = ServiceAccountCredentials.from_json_keyfile_name(cred_json, scope)
+    client = gspread.authorize(creds)
+    return client
+
+# Fungsi untuk mengambil dan memperbarui data dari BMKG ke Google Sheets
+def fetch_and_update_data(sheet_url):
+    client = authenticate_google_sheets()
+    spreadsheet = client.open_by_url(sheet_url)
+    sheet = spreadsheet.get_worksheet(0)  # Worksheet pertama
+
+    # Ambil data dari BMKG
     url = 'https://data.bmkg.go.id/DataMKG/TEWS/autogempa.json'
     response = requests.get(url)
     response_data = response.json()
     
-    # Normalisasi JSON menjadi DataFrame
+    # Normalisasi JSON ke dalam DataFrame
     df = pd.json_normalize(response_data['Infogempa']['gempa'])
+    df_relevant = df[['Tanggal', 'Jam', 'Coordinates', 'DateTime', 'Lintang', 'Bujur', 
+                      'Magnitude', 'Kedalaman', 'Wilayah', 'Potensi', 'Dirasakan', 'Shakemap']]
     
-    # Pilih kolom yang relevan
-    df_relevant = df[['Tanggal', 'Jam', 'Coordinates', 'DateTime', 'Lintang', 'Bujur', 'Magnitude', 'Kedalaman', 'Wilayah', 'Potensi', 'Dirasakan', 'Shakemap']]
-    
-    # Cek apakah file CSV sudah ada
-    if os.path.exists(csv_path):
-        # Jika file sudah ada, baca data yang ada dan cari data terbaru
-        existing_data = pd.read_csv(csv_path)
+    # Baca data dari Google Sheets
+    existing_data = pd.DataFrame(sheet.get_all_records())
+    if not existing_data.empty:
         latest_date_in_file = existing_data['DateTime'].max()
-        
-        # Filter data hanya yang terbaru
+        # Filter data yang lebih baru dari yang sudah ada di Google Sheets
         df_relevant = df_relevant[df_relevant['DateTime'] > latest_date_in_file]
-    else:
-        # Jika file CSV belum ada, buat file baru dengan header dan data pertama
-        df_relevant.to_csv(csv_path, index=False)
-        print(f"File CSV baru dibuat di {csv_path}")
-    
-    # Tambahkan data baru ke CSV jika ada
+
+    # Jika ada data baru, tambahkan ke Google Sheets
     if not df_relevant.empty:
-        df_relevant.to_csv(csv_path, mode='a', index=False, header=False)
-        print("Data terbaru ditambahkan ke CSV.")
-        
-        # Jika ada data baru, jalankan proses berikut
+        sheet.append_rows(df_relevant.values.tolist())
+        print("Data terbaru berhasil ditambahkan ke Google Sheets.")
         create_map()
         time.sleep(5)
         create_UI()
         time.sleep(5)
-        # up_to_instagram()
-        
-        # Komit dan push perubahan ke GitHub
-        commit_and_push_to_github()
+        up_to_instagram()
     else:
         print("Data sudah up-to-date. Tidak ada data baru.")
 
-# Path ke file CSV relatif ke root repositori
-csv_path = os.path.join("InfoGempaID_CSV", "DatasetGempa.csv")
+# Path Google Sheets kamu
+sheet_url = 'https://docs.google.com/spreadsheets/d/1yoEq7eaVEOivxJyH8JjtHDAgHlE1qOnmuZIij2AxYJc/edit?usp=sharing'  # Ganti dengan URL Google Sheets kamu
 
 def create_map():
     import matplotlib.pyplot as plt
@@ -67,8 +68,17 @@ def create_map():
             longitude = -float(bujur.replace('BB', '').strip())
         return latitude, longitude
 
-    def read_data_from_csv(csv_path):
-        df = pd.read_csv(csv_path)
+    def read_data_from_sheets(sheet_url):
+        # Autentikasi dan buka sheet berdasarkan URL
+        client = authenticate_google_sheets()
+        spreadsheet = client.open_by_url(sheet_url)
+        sheet = spreadsheet.get_worksheet(0)  # worksheet pertama
+
+        # Mendapatkan data dari Google Sheets sebagai DataFrame
+        records = sheet.get_all_records()
+        df = pd.DataFrame(records)
+
+        # Mendapatkan data terbaru berdasarkan DateTime yang paling akhir
         latest_data = df.sort_values('DateTime', ascending=False).iloc[0]
         return {
             "tanggal": latest_data['Tanggal'],
@@ -82,8 +92,9 @@ def create_map():
             'potensi': latest_data['Potensi']
         }
 
-    # Membaca data terbaru dari CSV
-    data = read_data_from_csv(csv_path)
+    # Contoh penggunaan
+    data = read_data_from_sheets(sheet_url)
+    
     latitude, longitude = convert_coordinates(data['lintang'], data['bujur'])
     
     fig = plt.figure(figsize=(9, 18))
@@ -109,8 +120,17 @@ def create_UI():
     from PIL import Image, ImageDraw, ImageFont
     import textwrap
 
-    def read_data_from_csv(csv_path):
-        df = pd.read_csv(csv_path)
+    def read_data_from_sheets(sheet_url):
+        # Autentikasi dan buka sheet berdasarkan URL
+        client = authenticate_google_sheets()
+        spreadsheet = client.open_by_url(sheet_url)
+        sheet = spreadsheet.get_worksheet(0)  # worksheet pertama
+
+        # Mendapatkan data dari Google Sheets sebagai DataFrame
+        records = sheet.get_all_records()
+        df = pd.DataFrame(records)
+
+        # Mendapatkan data terbaru berdasarkan DateTime yang paling akhir
         latest_data = df.sort_values('DateTime', ascending=False).iloc[0]
         return {
             "tanggal": latest_data['Tanggal'],
@@ -123,6 +143,8 @@ def create_UI():
             "wilayah": latest_data['Wilayah'],
             'potensi': latest_data['Potensi']
         }
+
+    # Contoh penggunaan
 
     def wrap_text(text, line_length=40):
         return textwrap.wrap(text, width=line_length)
@@ -159,7 +181,7 @@ def create_UI():
         img.save(output_path)
         print(f"Gambar disimpan di {output_path}")
 
-    data = read_data_from_csv(csv_path)
+    data = read_data_from_sheets(sheet_url)
     template_path = os.path.join("InfoGempaID_CSV", "UiGempaTanpaMap.png")
     output_path = os.path.join("InfoGempaID_CSV", "GEMPATERBARU.png")
     map_path = os.path.join("InfoGempaID_CSV", "lokasi_baru1.png")
@@ -170,8 +192,17 @@ def create_UI():
 def up_to_instagram():
     from instagrapi import Client
 
-    def read_data_from_csv(csv_path):
-        df = pd.read_csv(csv_path)
+    def read_data_from_sheets(sheet_url):
+        # Autentikasi dan buka sheet berdasarkan URL
+        client = authenticate_google_sheets()
+        spreadsheet = client.open_by_url(sheet_url)
+        sheet = spreadsheet.get_worksheet(0)  # worksheet pertama
+
+        # Mendapatkan data dari Google Sheets sebagai DataFrame
+        records = sheet.get_all_records()
+        df = pd.DataFrame(records)
+
+        # Mendapatkan data terbaru berdasarkan DateTime yang paling akhir
         latest_data = df.sort_values('DateTime', ascending=False).iloc[0]
         return {
             "tanggal": latest_data['Tanggal'],
@@ -185,12 +216,13 @@ def up_to_instagram():
             'potensi': latest_data['Potensi']
         }
 
-    data = read_data_from_csv(csv_path)
+    # Contoh penggunaan
+    data = read_data_from_sheets(sheet_url)
 
     capt = (f"🌍 Gempa Terkini ! 🌍\n\n📍  Lokasi     : {data['wilayah']}\n📅  Tanggal   : {data['tanggal']}\n"
             f"🕗  Waktu     : {data['waktu']}\n🎯  Koordinat : {data['koordinat']}\n"
             f"📊  Magnitudo : {data['magnitude']} SR\n📏  Kedalaman : {data['kedalaman']}\n"
-            f"📢  Potensi   : {data['potensi']}\n\nData resmi dari BMKG.")
+            f"📢  Potensi   : {data['potensi']}\n#Gempa #Kesiapsiagaan #Indonesia #InfoIDGempa #MitigasiBencana #SiagaBencana #KesiapsiagaanGempa #GempaBumi #IndonesiaTangguh #InfoGempaTerkini #GempaTerkini #UpdateGempa #PerlindunganDiri #Kebencanaan #Earthquake #EarthquakePreparedness\n\nData resmi dari BMKG.")
 
     cl = Client()
     cl.login("infogempaid", "Megamode12")
@@ -198,29 +230,5 @@ def up_to_instagram():
     cl.photo_upload(media_path, capt)
     print("Post berhasil diunggah ke Instagram.")
 
-def commit_and_push_to_github():
-    try:
-        commit_message = "Update earthquake map and data"
-        csv_path = os.path.join("InfoGempaID_CSV", "DatasetGempa.csv")
-        png_paths = [
-            os.path.join("InfoGempaID_CSV", "lokasi_baru1.png"), 
-            os.path.join("InfoGempaID_CSV", "GEMPATERBARU.png")
-        ]
-
-        # Git commands
-        subprocess.run(["git", "add", *png_paths, csv_path], check=True)
-        subprocess.run(["git", "commit", "-m", commit_message], check=True)
-
-        # URL dengan Personal Access Token
-        token = "<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>"  # Ganti <your_token> dengan token Anda
-        repo_url = f"https://{token}@github.com/RizwanHamkaUGM/InfoGEMPAIndonesia.git"
-        subprocess.run(["git", "remote", "set-url", "origin", repo_url], check=True)
-
-        # Push changes
-        subprocess.run(["git", "push", "origin", "main"], check=True)  # Sesuaikan branch jika berbeda
-        print("Perubahan berhasil dikomit dan dipush ke GitHub.")
-    except subprocess.CalledProcessError as e:
-        print(f"Terjadi kesalahan saat mencoba mengkomit/push: {e}")
-
 # Eksekusi proses utama
-fetch_and_update_data(csv_path)
+fetch_and_update_data(sheet_url)
