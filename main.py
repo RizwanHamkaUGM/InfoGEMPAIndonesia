@@ -11,7 +11,7 @@ def authenticate_google_sheets():
     scope = ['https://www.googleapis.com/auth/spreadsheets']
     
     # Ambil credential JSON dari environment variable
-    cred_json = os.environ("CREDENTIALS_API")
+    cred_json = os.environ["CREDENTIALS_API"]
     if not cred_json:
         raise ValueError("Environment variable 'CREDENTIALS_API' tidak ditemukan atau kosong.")
     print("Environment variable berhasil ditemukan.")
