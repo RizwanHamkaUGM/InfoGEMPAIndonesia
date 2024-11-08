@@ -2,7 +2,7 @@ name: Earthquake Data
 
 on:
   schedule:
-    - cron: '*/31 * * * *'  # Menjalankan setiap 30 menit
+    - cron: '*/60 * * * *'  # Menjalankan setiap 30 menit
   push:
     branches:
       - main
