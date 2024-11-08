@@ -12,9 +12,15 @@ def authenticate_google_sheets():
     
     # Ambil credential JSON dari environment variable
     cred_json = os.getenv("CREDENTIALS_API")
+    if not cred_json:
+        raise ValueError("Environment variable 'CREDENTIALS_API' tidak ditemukan atau kosong.")
+    print("Environment variable berhasil ditemukan.")
     
     # Parsing JSON string ke dalam dictionary
-    creds_dict = json.loads(cred_json)
+    try:
+        creds_dict = json.loads(cred_json)
+    except json.JSONDecodeError:
+        raise ValueError("JSON di environment variable 'CREDENTIALS_API' tidak valid atau mengalami kesalahan decoding.")
     
     # Buat credential object dari dictionary
     creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
