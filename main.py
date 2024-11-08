@@ -40,7 +40,7 @@ def fetch_and_update_data(csv_path):
         time.sleep(5)
         create_UI()
         time.sleep(5)
-        up_to_instagram()
+        # up_to_instagram()
         
         # Komit dan push perubahan ke GitHub
         commit_and_push_to_github()
