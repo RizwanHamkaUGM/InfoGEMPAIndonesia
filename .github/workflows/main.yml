@@ -24,11 +24,7 @@ jobs:
       run: |
         pip install pandas requests gspread oauth2client matplotlib cartopy Pillow instagrapi
 
-    - name: Set up Google Sheets credentials
-      run: |
-        echo "${{ secrets.CREDENTIALS_API }}" > credentials.json
-
     - name: Run main script
       run: python main.py
       env:
-          GOOGLE_APPLICATION_CREDENTIALS: credentials.json
+        CREDENTIALS_API: ${{ secrets.CREDENTIALS_API }}
