@@ -1,0 +1,8 @@
+pandas 
+requests 
+gspread 
+oauth2client 
+matplotlib 
+cartopy 
+Pillow 
+instagrapi
