@@ -2,7 +2,7 @@ name: Earthquake Data
 
 on:
   schedule:
-    - cron: '*/60 * * * *'  # Menjalankan setiap 30 menit
+    - cron: '*/30 * * * *'  # Menjalankan setiap 30 menit
   push:
     branches:
       - main
@@ -22,7 +22,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        pip install requests pandas SQLAlchemy python-dotenv matplotlib cartopy instagrapi pillow
+        pip install pandas requests gspread oauth2client matplotlib cartopy Pillow instagrapi
 
     - name: Run main script
       run: python main.py
