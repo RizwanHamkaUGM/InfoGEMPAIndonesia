@@ -8,23 +8,28 @@ from oauth2client.service_account import ServiceAccountCredentials
 
 # Autentikasi Google Sheets
 def authenticate_google_sheets():
+    # Define the Google Sheets API scope
     scope = ['https://www.googleapis.com/auth/spreadsheets']
 
-    # Fetch and decode the credential JSON from the environment variable
+    # Fetch the credential JSON string from the environment variable
     cred_json = os.environ.get("CREDENTIALS_API")
     if not cred_json:
-        raise ValueError("Environment variable 'CREDENTIALS_API' not found or is empty.")
-    print("Environment variable found.")
+        raise ValueError("Environment variable 'CREDENTIALS_API' is not set or is empty.")
 
-    # Decode the JSON string to a dictionary
+    # Attempt to decode the JSON string to a dictionary
     try:
-        creds_dict = json.loads(cred_json)  # Convert JSON string to dict
+        creds_dict = json.loads(cred_json)
     except json.JSONDecodeError as e:
-        raise ValueError("Invalid JSON in 'CREDENTIALS_API' environment variable.") from e
+        raise ValueError("The 'CREDENTIALS_API' environment variable contains invalid JSON data.") from e
 
-    # Create credentials from dictionary
-    creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
-    client = gspread.authorize(creds)
+    # Authenticate using the decoded credentials dictionary
+    try:
+        creds = ServiceAccountCredentials.from_json_keyfile_dict(creds_dict, scope)
+        client = gspread.authorize(creds)
+    except Exception as e:
+        raise ValueError("Failed to authenticate with Google Sheets API.") from e
+
+    print("Successfully authenticated with Google Sheets API.")
     return client
 
 # Fungsi untuk mengambil dan memperbarui data dari BMKG ke Google Sheets
