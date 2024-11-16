@@ -60,9 +60,7 @@ def fetch_and_update_data(sheet_url):
         sheet.append_rows(df_relevant.values.tolist())
         print("Data terbaru berhasil ditambahkan ke Google Sheets.")
         create_map()
-        time.sleep(5)
         create_UI()
-        time.sleep(5)
         up_to_instagram()
     else:
         print("Data sudah up-to-date. Tidak ada data baru.")
