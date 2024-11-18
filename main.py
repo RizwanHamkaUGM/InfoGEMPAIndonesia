@@ -173,7 +173,7 @@ def up_to_instagram():
                f"📢 Potensi: {data['Potensi']}\n\n#Gempa #Indonesia")
 
     cl = Client()
-    cl.login("waanhk", "Megamode12")
+    cl.login("infogempaid", "Megamode12")
     media_path = os.path.join("InfoGempaID_CSV", "GEMPATERBARU.png")
     cl.photo_upload(media_path, caption)
     print("Post berhasil diunggah ke Instagram.")
