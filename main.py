@@ -45,6 +45,9 @@ def sync_data_to_crud(data):
                 raise ValueError(f"Failed to create new record. HTTP Status: {response.status_code}")
         
         print("Data terbaru berhasil ditambahkan ke CRUD.")
+        create_map()
+        create_UI()
+        up_to_instagram()
     else:
         print("Tidak ada data baru untuk disinkronkan.")
 
@@ -173,7 +176,7 @@ def up_to_instagram():
                f"📢 Potensi: {data['Potensi']}\n\n#Gempa #Indonesia")
 
     cl = Client()
-    cl.login("infogempaid", "Megamode12")
+    cl.login("infogempaid", "passwordAnda")
     media_path = os.path.join("InfoGempaID_CSV", "GEMPATERBARU.png")
     cl.photo_upload(media_path, caption)
     print("Post berhasil diunggah ke Instagram.")
@@ -187,15 +190,8 @@ def main_process():
         
         # Sinkronisasi ke CRUD
         sync_data_to_crud(data)
-        
-        # Lakukan proses berikutnya
-        create_map()
-        create_UI()
-        up_to_instagram()
 
     except Exception as e:
         print(f"Error occurred: {e}")
 
-
-# Jalankan
 main_process()
