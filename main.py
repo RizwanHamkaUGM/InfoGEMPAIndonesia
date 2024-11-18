@@ -2,9 +2,7 @@ import os
 import time
 import pandas as pd
 import requests
-import gspread
 import json
-from oauth2client.service_account import ServiceAccountCredentials
 
 
 # URL CRUD Google Apps Script
@@ -201,8 +199,3 @@ def main_process():
 
 # Jalankan
 main_process()
-
-    print("Post berhasil diunggah ke Instagram.")
-
-# Eksekusi proses utama
-fetch_and_update_data(sheet_url)
