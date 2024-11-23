@@ -66,7 +66,7 @@ def fetch_and_update_data(sheet_url):
         print("Data sudah up-to-date. Tidak ada data baru.")
 
 # Path Google Sheets kamu
-sheet_url = 'https://docs.google.com/spreadsheets/d/1bsRWRYB-Z4fnKhVskk_S7N9sidY5qQcgCU-VIly7jxQ/edit?usp=sharing'  # Ganti dengan URL Google Sheets kamu
+sheet_url = 'https://docs.google.com/spreadsheets/d/1yoEq7eaVEOivxJyH8JjtHDAgHlE1qOnmuZIij2AxYJc/edit?usp=sharing'  # Ganti dengan URL Google Sheets kamu
 
 def create_map():
     import matplotlib.pyplot as plt
