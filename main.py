@@ -242,7 +242,7 @@ def up_to_instagram():
             f"📢  Potensi   : {data['potensi']}\n#Gempa #Kesiapsiagaan #Indonesia #InfoIDGempa #MitigasiBencana #SiagaBencana #KesiapsiagaanGempa #GempaBumi #IndonesiaTangguh #InfoGempaTerkini #GempaTerkini #UpdateGempa #PerlindunganDiri #Kebencanaan #Earthquake #EarthquakePreparedness\n\nData resmi dari BMKG.")
 
     cl = Client()
-    cl.login("infogempaid", "Megamode12")
+    cl.login("", "")
     media_path = os.path.join("InfoGempaID_CSV", "GEMPATERBARU.png")
     cl.photo_upload(media_path, capt)
     print("Post berhasil diunggah ke Instagram.")
